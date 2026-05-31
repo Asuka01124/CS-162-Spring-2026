@@ -60,8 +60,13 @@ ssize_t len_words(WordCount *wchead) {
 WordCount *find_word(WordCount *wchead, char *word) {
   /* Return count for word, if it exists
      如果指定单词存在，则返回对应的计数节点。 */
-  WordCount *wc = NULL;
-  return wc;
+  while (wchead) {
+    if (strcmp(wchead->word, word) == 0) {
+      return wchead;
+    }
+    wchead = wchead->next;
+  }
+  return NULL;
 }
 
 int add_word(WordCount **wclist, char *word) {
@@ -72,9 +77,25 @@ int add_word(WordCount **wclist, char *word) {
      否则插入该单词，并将计数设为 1。
      如果函数体中没有遇到错误，则返回 0；否则返回 1。
   */
- return 0;
+  WordCount *existing = find_word(*wclist, word);
+  if (existing) {
+    existing->count++;
+    return 0;
+  }
+  WordCount *new_wc = (WordCount *) malloc(sizeof(WordCount));
+  if (!new_wc) {
+    return 1;
+  }
+  new_wc->word = new_string(word);
+  if (!new_wc->word) {
+    free(new_wc);
+    return 1;
+  }
+  new_wc->count = 1;
+  new_wc->next = *wclist;
+  *wclist = new_wc;
+  return 0;
 }
-
 void fprint_words(WordCount *wchead, FILE *ofile) {
   /* print word counts to a file
      将单词计数结果打印到文件。 */

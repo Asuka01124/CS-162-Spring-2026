@@ -41,6 +41,8 @@ WordCount *word_counts = NULL;
    文件中每个单词的最大长度。 */
 #define MAX_WORD_LEN 64
 
+static bool wordcount_less(const WordCount *wc1, const WordCount *wc2);
+
 /*
  * 3.1.1 Total Word Count
  * 3.1.1 单词总数统计
@@ -80,6 +82,24 @@ int num_words(FILE* infile) {
  * 该函数应返回 1；否则返回 0。
  */
 int count_words(WordCount **wclist, FILE *infile) {
+  int c;
+  while((c = fgetc(infile)) != EOF) {
+    char *work = (char *)malloc(MAX_WORD_LEN + 1);
+    if (!work) {
+      return 1;
+    }
+    if (isalpha(c)) {
+      int i = 0;
+      work[i++] = tolower(c);
+      while((c = fgetc(infile)) != EOF && isalpha(c) && i < MAX_WORD_LEN - 1) {
+        work[i++] = tolower(c);
+      }
+      work[i] = '\0';
+      add_word(wclist, work);
+      wordcount_sort(wclist, wordcount_less);
+    }
+    free(work);
+  }
   return 0;
 }
 
@@ -90,7 +110,11 @@ int count_words(WordCount **wclist, FILE *infile) {
  * 可用函数：strcmp()。
  */
 static bool wordcount_less(const WordCount *wc1, const WordCount *wc2) {
-  return 0;
+  
+  if (wc1->count != wc2->count) {
+    return wc1->count < wc2->count;
+  }
+  return strcmp(wc1->word, wc2->word) < 0;
 }
 
 // In trying times, displays a helpful message.
